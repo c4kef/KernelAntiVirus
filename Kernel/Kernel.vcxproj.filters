@@ -24,13 +24,13 @@
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Driver.c">
+    <ClCompile Include="Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessLister.c">
+    <ClCompile Include="ProcessLister.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utility.c">
+    <ClCompile Include="Utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,6 +42,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProcessLister.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NTUndocumented.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="new.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

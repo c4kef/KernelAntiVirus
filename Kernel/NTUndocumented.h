@@ -35,16 +35,21 @@ typedef struct _MEMORY_BASIC_INFORMATION {
 	INT32  Type;
 } MEMORY_BASIC_INFORMATION, *PMEMORY_BASIC_INFORMATION;
 
-NTKERNELAPI NTSTATUS IoCreateDriver(IN PUNICODE_STRING DriverName, OPTIONAL IN PDRIVER_INITIALIZE InitializationFunction);
 
-NTKERNELAPI VOID KeStackAttachProcess(__inout struct _KPROCESS * PROCESS, __out PRKAPC_STATE ApcState);
-NTKERNELAPI VOID KeUnstackDetachProcess(__in PRKAPC_STATE ApcState);
+extern "C" __declspec(dllimport) NTKERNELAPI NTSTATUS IoCreateDriver(IN PUNICODE_STRING DriverName, OPTIONAL IN PDRIVER_INITIALIZE InitializationFunction);
 
-NTKERNELAPI NTSTATUS NTAPI MmCopyVirtualMemory(IN PEPROCESS FromProcess, IN PVOID FromAddress, IN PEPROCESS ToProcess, OUT PVOID ToAddress, IN SIZE_T BufferSize, IN KPROCESSOR_MODE PreviousMode, OUT PSIZE_T NumberOfBytesCopied);
+extern "C" __declspec(dllimport) NTKERNELAPI VOID KeStackAttachProcess(__inout struct _KPROCESS * PROCESS, __out PRKAPC_STATE ApcState);
 
-NTSYSAPI NTSTATUS NTAPI ZwQuerySystemInformation(IN SYSTEM_INFORMATION_CLASS SystemInformationClass, OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG ReturnLength OPTIONAL);
-NTSYSAPI NTSTATUS NTAPI ZwQueryVirtualMemory(IN HANDLE ProcessHandle, IN PVOID BaseAddress, IN MEMORY_INFORMATION_CLASS MemoryInformationClass, OUT PVOID MemoryInformation, IN SIZE_T MemoryInformationLength, OUT PSIZE_T ReturnLength OPTIONAL);
+extern "C" __declspec(dllimport) NTKERNELAPI VOID KeUnstackDetachProcess(__in PRKAPC_STATE ApcState);
 
-NTKERNELAPI NTSTATUS PsLookupProcessByProcessId(IN HANDLE ProcessId, OUT PEPROCESS *Process);
-NTKERNELAPI PVOID PsGetProcessSectionBaseAddress(__in PEPROCESS Process);
-NTKERNELAPI PPEB NTAPI PsGetProcessPeb(IN PEPROCESS Process);
+extern "C" __declspec(dllimport) NTKERNELAPI NTSTATUS NTAPI MmCopyVirtualMemory(IN PEPROCESS FromProcess, IN PVOID FromAddress, IN PEPROCESS ToProcess, OUT PVOID ToAddress, IN SIZE_T BufferSize, IN KPROCESSOR_MODE PreviousMode, OUT PSIZE_T NumberOfBytesCopied);
+
+extern "C" __declspec(dllimport) NTSYSAPI NTSTATUS NTAPI ZwQuerySystemInformation(IN SYSTEM_INFORMATION_CLASS SystemInformationClass, OUT PVOID SystemInformation, IN ULONG SystemInformationLength, OUT PULONG ReturnLength OPTIONAL);
+
+extern "C" __declspec(dllimport) NTSYSAPI NTSTATUS NTAPI ZwQueryVirtualMemory(IN HANDLE ProcessHandle, IN PVOID BaseAddress, IN MEMORY_INFORMATION_CLASS MemoryInformationClass, OUT PVOID MemoryInformation, IN SIZE_T MemoryInformationLength, OUT PSIZE_T ReturnLength OPTIONAL);
+
+extern "C" __declspec(dllimport) NTKERNELAPI NTSTATUS PsLookupProcessByProcessId(IN HANDLE ProcessId, OUT PEPROCESS *Process);
+
+extern "C" __declspec(dllimport) NTKERNELAPI PVOID PsGetProcessSectionBaseAddress(__in PEPROCESS Process);
+
+extern "C" __declspec(dllimport) NTKERNELAPI PPEB NTAPI PsGetProcessPeb(IN PEPROCESS Process);

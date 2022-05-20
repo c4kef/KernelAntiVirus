@@ -4,9 +4,8 @@
 #include <wdf.h>
 
 DRIVER_INITIALIZE DriverEntry;
-#pragma alloc_text(INIT, DriverEntry)
 
-NTSTATUS Unload(IN PDRIVER_OBJECT DriverObject)
+VOID Unload(IN PDRIVER_OBJECT DriverObject)
 {
 	DbgPrintEx(0, 0, "Driver is unloaded!\n");
 }
@@ -16,11 +15,11 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 	UNREFERENCED_PARAMETER(DriverObject);
 	UNREFERENCED_PARAMETER(RegistryPath);
 
-	DriverObject->DriverUnload = &Unload;
+	DriverObject->DriverUnload = Unload;
 	
 	DbgPrintEx(0, 0, "Driver is loaded!\n");
 
-	GetProcessList();
+	Dump((HANDLE)0);
 
 	return STATUS_SUCCESS;
 }

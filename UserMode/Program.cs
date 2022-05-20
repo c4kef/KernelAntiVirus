@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace KsDumperClient
@@ -11,9 +14,16 @@ namespace KsDumperClient
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
+            var original = new List<string>();
+            original.AddRange(File.ReadAllLines("original.txt"));
+            var found = File.ReadAllLines("found.txt");
+            foreach (var f in found)
+                original.RemoveAll(line => line.ToLower().Contains(f.ToLower()));
+
+            File.WriteAllLines("reversed.txt", original.ToArray());
+            /*Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Dumper());
+            Application.Run(new Dumper());*/
         }
     }
 }

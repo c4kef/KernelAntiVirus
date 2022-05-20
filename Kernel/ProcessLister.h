@@ -1,221 +1,93 @@
 #pragma once
 #include <ntddk.h>
 
-typedef struct _SYSTEM_PROCESS_INFORMATION
+typedef struct _MM_AVL_NODE // Size=24
 {
-	ULONG NextEntryOffset;
-	ULONG NumberOfThreads;
-	LARGE_INTEGER SpareLi1;
-	LARGE_INTEGER SpareLi2;
-	LARGE_INTEGER SpareLi3;
-	LARGE_INTEGER CreateTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER KernelTime;
-	UNICODE_STRING ImageName;
-	KPRIORITY BasePriority;
-	HANDLE UniqueProcessId;
-	HANDLE InheritedFromUniqueProcessId;
-	ULONG HandleCount;
-	ULONG SessionId;
-	ULONG_PTR PageDirectoryBase;
-	SIZE_T PeakVirtualSize;
-	SIZE_T VirtualSize;
-	ULONG PageFaultCount;
-	SIZE_T PeakWorkingSetSize;
-	SIZE_T WorkingSetSize;
-	SIZE_T QuotaPeakPagedPoolUsage;
-	SIZE_T QuotaPagedPoolUsage;
-	SIZE_T QuotaPeakNonPagedPoolUsage;
-	SIZE_T QuotaNonPagedPoolUsage;
-	SIZE_T PagefileUsage;
-	SIZE_T PeakPagefileUsage;
-	SIZE_T PrivatePageCount;
-	LARGE_INTEGER ReadOperationCount;
-	LARGE_INTEGER WriteOperationCount;
-	LARGE_INTEGER OtherOperationCount;
-	LARGE_INTEGER ReadTransferCount;
-	LARGE_INTEGER WriteTransferCount;
-	LARGE_INTEGER OtherTransferCount;
-} SYSTEM_PROCESS_INFORMATION, *PSYSTEM_PROCESS_INFORMATION;
+	struct _MM_AVL_NODE* LeftChild; // Size=8 Offset=0
+	struct _MM_AVL_NODE* RightChild; // Size=8 Offset=8
 
-typedef struct _LDR_DATA_TABLE_ENTRY
+	union ___unnamed1666 // Size=8
+	{
+		struct
+		{
+			__int64 Balance : 2; // Size=8 Offset=0 BitOffset=0 BitCount=2
+		};
+		struct _MM_AVL_NODE* Parent; // Size=8 Offset=0
+	} u1;
+} MM_AVL_NODE, * PMM_AVL_NODE, * PMMADDRESS_NODE;
+
+typedef struct _RTL_AVL_TREE // Size=8
 {
-	LIST_ENTRY InLoadOrderLinks;
-	LIST_ENTRY InMemoryOrderLinks;
-	CHAR Reserved0[0x10];
-	PVOID DllBase;
-	PVOID EntryPoint;
-	ULONG SizeOfImage;
-	UNICODE_STRING FullDllName;
-	UNICODE_STRING BaseDllName;
-} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
+	PMM_AVL_NODE BalancedRoot;
+	void* NodeHint;
+	unsigned __int64 NumberGenericTableElements;
+} RTL_AVL_TREE, * PRTL_AVL_TREE, MM_AVL_TABLE, * PMM_AVL_TABLE;
 
-typedef struct _PEB_LDR_DATA
+union _EX_PUSH_LOCK // Size=8
 {
-	ULONG Length;
-	BOOLEAN Initialized;
-	PVOID SsHandler;
-	LIST_ENTRY InLoadOrderModuleList;
-	LIST_ENTRY InMemoryOrderModuleList;
-	LIST_ENTRY InInitializationOrderModuleList;
-	PVOID EntryInProgress;
-} PEB_LDR_DATA, *PPEB_LDR_DATA;
+	struct
+	{
+		unsigned __int64 Locked : 1; // Size=8 Offset=0 BitOffset=0 BitCount=1
+		unsigned __int64 Waiting : 1; // Size=8 Offset=0 BitOffset=1 BitCount=1
+		unsigned __int64 Waking : 1; // Size=8 Offset=0 BitOffset=2 BitCount=1
+		unsigned __int64 MultipleShared : 1; // Size=8 Offset=0 BitOffset=3 BitCount=1
+		unsigned __int64 Shared : 60; // Size=8 Offset=0 BitOffset=4 BitCount=60
+	};
+	unsigned __int64 Value; // Size=8 Offset=0
+	void* Ptr; // Size=8 Offset=0
+};
 
-typedef struct _PEB64 {
-	CHAR Reserved[0x10];
-	PVOID ImageBaseAddress;
-	PPEB_LDR_DATA Ldr;
-} PEB64, *PPEB64;
-
-typedef struct _IMAGE_DOS_HEADER {
-	USHORT   e_magic;
-	USHORT   e_cblp;
-	USHORT   e_cp;
-	USHORT   e_crlc;
-	USHORT   e_cparhdr;
-	USHORT   e_minalloc;
-	USHORT   e_maxalloc;
-	USHORT   e_ss;
-	USHORT   e_sp;
-	USHORT   e_csum;
-	USHORT   e_ip;
-	USHORT   e_cs;
-	USHORT   e_lfarlc;
-	USHORT   e_ovno;
-	USHORT   e_res[4];
-	USHORT   e_oemid;
-	USHORT   e_oeminfo;
-	USHORT   e_res2[10];
-	LONG   e_lfanew;
-} IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
-
-typedef struct _PE_HEADER {
-	CHAR Signature[4];
-	USHORT Machine;
-	USHORT NumberOfSections;
-	UINT32 TimeDateStamp;
-	UINT32 PointerToSymbolTable;
-	UINT32 NumberOfSymbols;
-	USHORT SizeOfOptionalHeader;
-	USHORT Characteristics;
-	USHORT Magic;
-} PE_HEADER, *PPE_HEADER;
-
-#define PE_HEADER_MAGIC_OFFSET 0x18
-#define IMAGE_NT_OPTIONAL_HDR32_MAGIC 0x10b
-#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES        16
-
-#define IS_WOW64_PE( baseAddress ) (*((USHORT*)((CHAR *)baseAddress + \
-								((PIMAGE_DOS_HEADER)baseAddress)->e_lfanew + PE_HEADER_MAGIC_OFFSET)) \
-								== IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-
-typedef struct _IMAGE_DATA_DIRECTORY
+struct _MMVAD_FLAGS // Size=4
 {
-	ULONG VirtualAddress;
-	ULONG Size;
-} IMAGE_DATA_DIRECTORY, * PIMAGE_DATA_DIRECTORY;
-
-typedef struct _IMAGE_OPTIONAL_HEADER32
+	unsigned long VadType : 3; // Size=4 Offset=0 BitOffset=0 BitCount=3
+	unsigned long Protection : 5; // Size=4 Offset=0 BitOffset=3 BitCount=5
+	unsigned long PreferredNode : 6; // Size=4 Offset=0 BitOffset=8 BitCount=6
+	unsigned long NoChange : 1; // Size=4 Offset=0 BitOffset=14 BitCount=1
+	unsigned long PrivateMemory : 1; // Size=4 Offset=0 BitOffset=15 BitCount=1
+	unsigned long Teb : 1; // Size=4 Offset=0 BitOffset=16 BitCount=1
+	unsigned long PrivateFixup : 1; // Size=4 Offset=0 BitOffset=17 BitCount=1
+	unsigned long ManySubsections : 1; // Size=4 Offset=0 BitOffset=18 BitCount=1
+	unsigned long Spare : 12; // Size=4 Offset=0 BitOffset=19 BitCount=12
+	unsigned long DeleteInProgress : 1; // Size=4 Offset=0 BitOffset=31 BitCount=1
+};
+struct _MMVAD_FLAGS1 // Size=4
 {
-	//
-	// Standard fields.
-	//
+	unsigned long CommitCharge : 31; // Size=4 Offset=0 BitOffset=0 BitCount=31
+	unsigned long MemCommit : 1; // Size=4 Offset=0 BitOffset=31 BitCount=1
+};
 
-	USHORT  Magic;
-	UCHAR   MajorLinkerVersion;
-	UCHAR   MinorLinkerVersion;
-	ULONG   SizeOfCode;
-	ULONG   SizeOfInitializedData;
-	ULONG   SizeOfUninitializedData;
-	ULONG   AddressOfEntryPoint;
-	ULONG   BaseOfCode;
-	ULONG   BaseOfData;
-
-	//
-	// NT additional fields.
-	//
-
-	ULONG   ImageBase;
-	ULONG   SectionAlignment;
-	ULONG   FileAlignment;
-	USHORT  MajorOperatingSystemVersion;
-	USHORT  MinorOperatingSystemVersion;
-	USHORT  MajorImageVersion;
-	USHORT  MinorImageVersion;
-	USHORT  MajorSubsystemVersion;
-	USHORT  MinorSubsystemVersion;
-	ULONG   Win32VersionValue;
-	ULONG   SizeOfImage;
-	ULONG   SizeOfHeaders;
-	ULONG   CheckSum;
-	USHORT  Subsystem;
-	USHORT  DllCharacteristics;
-	ULONG   SizeOfStackReserve;
-	ULONG   SizeOfStackCommit;
-	ULONG   SizeOfHeapReserve;
-	ULONG   SizeOfHeapCommit;
-	ULONG   LoaderFlags;
-	ULONG   NumberOfRvaAndSizes;
-	IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} IMAGE_OPTIONAL_HEADER32, * PIMAGE_OPTIONAL_HEADER32;
-
-typedef struct _IMAGE_OPTIONAL_HEADER64
+union ___unnamed1951 // Size=4
 {
-	USHORT Magic;
-	UCHAR MajorLinkerVersion;
-	UCHAR MinorLinkerVersion;
-	ULONG SizeOfCode;
-	ULONG SizeOfInitializedData;
-	ULONG SizeOfUninitializedData;
-	ULONG AddressOfEntryPoint;
-	ULONG BaseOfCode;
-	ULONGLONG ImageBase;
-	ULONG SectionAlignment;
-	ULONG FileAlignment;
-	USHORT MajorOperatingSystemVersion;
-	USHORT MinorOperatingSystemVersion;
-	USHORT MajorImageVersion;
-	USHORT MinorImageVersion;
-	USHORT MajorSubsystemVersion;
-	USHORT MinorSubsystemVersion;
-	ULONG Win32VersionValue;
-	ULONG SizeOfImage;
-	ULONG SizeOfHeaders;
-	ULONG CheckSum;
-	USHORT Subsystem;
-	USHORT DllCharacteristics;
-	ULONGLONG SizeOfStackReserve;
-	ULONGLONG SizeOfStackCommit;
-	ULONGLONG SizeOfHeapReserve;
-	ULONGLONG SizeOfHeapCommit;
-	ULONG LoaderFlags;
-	ULONG NumberOfRvaAndSizes;
-	struct _IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} IMAGE_OPTIONAL_HEADER64, * PIMAGE_OPTIONAL_HEADER64;
+	unsigned long LongFlags; // Size=4 Offset=0
+	struct _MMVAD_FLAGS VadFlags; // Size=4 Offset=0
+};
 
-typedef struct _IMAGE_FILE_HEADER // Size=20
+union ___unnamed1952 // Size=4
 {
-	USHORT Machine;
-	USHORT NumberOfSections;
-	ULONG TimeDateStamp;
-	ULONG PointerToSymbolTable;
-	ULONG NumberOfSymbols;
-	USHORT SizeOfOptionalHeader;
-	USHORT Characteristics;
-} IMAGE_FILE_HEADER, * PIMAGE_FILE_HEADER;
+	unsigned long LongFlags1; // Size=4 Offset=0
+	struct _MMVAD_FLAGS1 VadFlags1; // Size=4 Offset=0
+};
 
-typedef struct _IMAGE_NT_HEADERS64
+typedef struct _MMVAD_SHORT // Size=64
 {
-	ULONG Signature;
-	struct _IMAGE_FILE_HEADER FileHeader;
-	struct _IMAGE_OPTIONAL_HEADER64 OptionalHeader;
-} IMAGE_NT_HEADERS64, * PIMAGE_NT_HEADERS64;
+	union
+	{
+		struct _RTL_BALANCED_NODE VadNode; // Size=24 Offset=0
+		struct _MMVAD_SHORT* NextVad; // Size=8 Offset=0
+	};
+	unsigned long StartingVpn; // Size=4 Offset=24
+	unsigned long EndingVpn; // Size=4 Offset=28
+	unsigned char StartingVpnHigh; // Size=1 Offset=32
+	unsigned char EndingVpnHigh; // Size=1 Offset=33
+	unsigned char CommitChargeHigh; // Size=1 Offset=34
+	unsigned char SpareNT64VadUChar; // Size=1 Offset=35
+	long ReferenceCount; // Size=4 Offset=36
+	union _EX_PUSH_LOCK PushLock; // Size=8 Offset=40
+	union ___unnamed1951 u; // Size=4 Offset=48
+	union ___unnamed1952 u1; // Size=4 Offset=52
+	struct _MI_VAD_EVENT_BLOCK* EventList; // Size=8 Offset=56
+} MMVAD_SHORT, * PMMVAD_SHORT;
 
-typedef struct _IMAGE_NT_HEADERS
-{
-	ULONG Signature;
-	IMAGE_FILE_HEADER FileHeader;
-	IMAGE_OPTIONAL_HEADER32 OptionalHeader;
-} IMAGE_NT_HEADERS;
+#define GET_VAD_ROOT(Table) Table->BalancedRoot
 
-NTSTATUS GetProcessList();
+NTSTATUS Dump(HANDLE idProc);
