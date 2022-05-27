@@ -1,6 +1,14 @@
 #pragma once
 #include <ntddk.h>
 
+typedef struct _COPY_MEMORY
+{
+	ULONGLONG localbuf;         // Buffer address
+	ULONGLONG targetPtr;        // Target address
+	ULONGLONG size;             // Buffer size
+	BOOLEAN   write;            // TRUE if write operation, FALSE if read
+} COPY_MEMORY, * PCOPY_MEMORY;
+
 typedef struct _MM_AVL_NODE // Size=24
 {
 	struct _MM_AVL_NODE* LeftChild; // Size=8 Offset=0
