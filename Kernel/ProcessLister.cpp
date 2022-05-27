@@ -3,6 +3,27 @@
 #include "Utility.h"
 #include "vector.hpp"
 
+NTSTATUS ReadMemory(IN PCOPY_MEMORY pCopy)
+{
+	NTSTATUS status = STATUS_SUCCESS;
+
+	PEPROCESS process = NULL;
+
+	if (NT_SUCCESS(status))
+	{
+		__try {
+			ProbeForRead((PVOID)pCopy->targetPtr, pCopy->size, 1);
+			RtlCopyMemory((PVOID)pCopy->localbuf, (PVOID)pCopy->targetPtr, pCopy->size);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			DbgPrint("Address 0x%x isn't accessible.\n", pCopy->targetPtr);
+			status = STATUS_SEVERITY_INFORMATIONAL;
+		}
+	}
+
+	return status;
+}
+
 
 TABLE_SEARCH_RESULT EnumerateNodes(IN PMM_AVL_TABLE Table, OUT PMMADDRESS_NODE* NodeOrParent)
 {
@@ -77,28 +98,6 @@ TABLE_SEARCH_RESULT EnumerateNodes(IN PMM_AVL_TABLE Table, OUT PMMADDRESS_NODE* 
 		}
 	};
 }
-
-NTSTATUS ReadMemory(IN PCOPY_MEMORY pCopy)
-{
-	NTSTATUS status = STATUS_SUCCESS;
-
-	PEPROCESS process = NULL;
-
-	if (NT_SUCCESS(status))
-	{
-		__try {
-			ProbeForRead((PVOID)pCopy->targetPtr, pCopy->size, 1);
-			RtlCopyMemory((PVOID)pCopy->localbuf, (PVOID)pCopy->targetPtr, pCopy->size);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			DbgPrint("Address 0x%x isn't accessible.\n", pCopy->targetPtr);
-			status = STATUS_SEVERITY_INFORMATIONAL;
-		}
-	}
-
-	return status;
-}
-
 
 NTSTATUS Dump(HANDLE idProc)
 {
