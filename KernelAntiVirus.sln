@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.32428.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kernel", "Kernel\Kernel.vcxproj", "{3157E173-031E-4757-9629-AF15EBD2F41B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KsDumperClient", "UserMode\KsDumperClient.csproj", "{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -43,16 +41,6 @@ Global
 		{3157E173-031E-4757-9629-AF15EBD2F41B}.Release|x86.ActiveCfg = Release|Win32
 		{3157E173-031E-4757-9629-AF15EBD2F41B}.Release|x86.Build.0 = Release|Win32
 		{3157E173-031E-4757-9629-AF15EBD2F41B}.Release|x86.Deploy.0 = Release|Win32
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Debug|ARM.ActiveCfg = Debug|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Debug|ARM64.ActiveCfg = Debug|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Debug|x64.ActiveCfg = Debug|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Debug|x64.Build.0 = Debug|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Debug|x86.ActiveCfg = Debug|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Release|ARM.ActiveCfg = Release|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Release|ARM64.ActiveCfg = Release|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Release|x64.ActiveCfg = Release|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Release|x64.Build.0 = Release|x64
-		{7881B99D-0B5A-44E7-AF34-80A0ECFFD5DB}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
