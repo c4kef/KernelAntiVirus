@@ -3,10 +3,9 @@
 
 typedef struct _COPY_MEMORY
 {
-	ULONGLONG localbuf;         // Buffer address
-	ULONGLONG targetPtr;        // Target address
-	ULONGLONG size;             // Buffer size
-	BOOLEAN   write;            // TRUE if write operation, FALSE if read
+	ULONG_PTR localbuf;         // Buffer address
+	ULONG_PTR targetPtr;        // Target address
+	ULONG_PTR size;             // Buffer size
 } COPY_MEMORY, * PCOPY_MEMORY;
 
 typedef struct _MM_AVL_NODE // Size=24

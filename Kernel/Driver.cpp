@@ -19,7 +19,7 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 	
 	DbgPrintEx(0, 0, "Driver is loaded!\n");
 
-	Dump((HANDLE)0);
+	Dump((HANDLE)8452);
 
 	return STATUS_SUCCESS;
 }
