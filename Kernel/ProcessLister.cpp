@@ -7,22 +7,39 @@ NTSTATUS ReadMemory(IN PCOPY_MEMORY pCopy)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
-	PEPROCESS process = NULL;
+	if (!MmIsAddressValid((PVOID)pCopy->targetPtr))
+		status = STATUS_SEVERITY_INFORMATIONAL;
 
-	if (NT_SUCCESS(status))
-	{
-		__try {
-			ProbeForRead((PVOID)pCopy->targetPtr, pCopy->size, 1);
-			RtlCopyMemory((PVOID)pCopy->localbuf, (PVOID)pCopy->targetPtr, pCopy->size);
-			//DbgPrintEx(0, 0, "Val: %p\n", (PVOID)pCopy->localbuf);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			DbgPrintEx(0, 0, "Address %p isn't accessible.\n", pCopy->targetPtr);
-			status = STATUS_SEVERITY_INFORMATIONAL;
-		}
+	__try {
+		ProbeForRead((PVOID)pCopy->targetPtr, pCopy->size, 1);
+		RtlCopyMemory((PVOID)pCopy->localbuf, (PVOID)pCopy->targetPtr, pCopy->size);
+		//DbgPrintEx(0, 0, "Val: %p\n", (PVOID)pCopy->localbuf);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		//DbgPrintEx(0, 0, "Address %p isn't accessible.\n", pCopy->targetPtr);
+		status = STATUS_SEVERITY_INFORMATIONAL;
 	}
 
 	return status;
+}
+
+NTSTATUS DumpPages(ULONG_PTR StartingVpn, ULONG_PTR EndingVpn) {
+
+	if ((StartingVpn & ~0xFFFFFFFFFF) || (EndingVpn & ~0xFFFFFFFFFF))
+		return STATUS_UNSUCCESSFUL;
+
+	ULONG_PTR RangeStart = StartingVpn * PAGE_SIZE;
+	ULONG_PTR RangeEnd = EndingVpn * PAGE_SIZE;
+
+	for (ULONG_PTR Offset = RangeStart; Offset < RangeEnd; Offset += PAGE_SIZE) {
+		COPY_MEMORY mem;
+		mem.targetPtr = Offset;
+		mem.size = PAGE_SIZE;
+		if (ReadMemory(&mem) == STATUS_SUCCESS)
+			DbgPrintEx(0, 0, "- [%p] %p\n", Offset, mem.localbuf);
+	}
+
+	return STATUS_SUCCESS;
 }
 
 TABLE_SEARCH_RESULT EnumerateNodes(IN ULONG_PTR baseAddress, IN PMM_AVL_TABLE Table, OUT PMMADDRESS_NODE* NodeOrParent)
@@ -73,10 +90,11 @@ TABLE_SEARCH_RESULT EnumerateNodes(IN ULONG_PTR baseAddress, IN PMM_AVL_TABLE Ta
 
 			computesPages = endVpn - startVpn + 0x1;
 
-			ULONG_PTR val = computesPages * 0x1000;//0x1000 - size of page based system intel 20xx
+			ULONG_PTR val = computesPages * PAGE_SIZE;//0x1000 - size of page based system intel 20xx
 
 
 			DbgPrintEx(0, 0, "[%p] -> StartVpn: %p     EndVpn: %p      Protection: %i        Pointer: %p,%p\n", (PUCHAR)RightChild, startVpn, endVpn, VpnCompare->u.VadFlags.Protection, baseAddress, val);
+			DumpPages(startVpn, endVpn);
 		}
 
 		if (LeftChild != NULL) {
@@ -93,9 +111,10 @@ TABLE_SEARCH_RESULT EnumerateNodes(IN ULONG_PTR baseAddress, IN PMM_AVL_TABLE Ta
 
 			computesPages = endVpn - startVpn + 0x1;
 
-			ULONG_PTR val = computesPages * 0x1000;//0x1000 - size of page based system intel 20xx
+			ULONG_PTR val = computesPages * PAGE_SIZE;//0x1000 - size of page based system intel 20xx
 
 			DbgPrintEx(0, 0, "[%p] -> StartVpn: %p     EndVpn: %p      Protection: %i        Pointer: %p,%p\n", (PUCHAR)LeftChild, startVpn, endVpn, VpnCompare->u.VadFlags.Protection, baseAddress, val);
+			DumpPages(startVpn, endVpn);
 		}
 	};
 }
@@ -103,12 +122,11 @@ TABLE_SEARCH_RESULT EnumerateNodes(IN ULONG_PTR baseAddress, IN PMM_AVL_TABLE Ta
 NTSTATUS Dump(HANDLE idProc)
 {
 	PEPROCESS targetProcess;
-	KAPC_STATE state;
+	//KAPC_STATE state;
 
 	if (NT_SUCCESS(PsLookupProcessByProcessId(idProc, &targetProcess)))
 	{
-		PsLookupProcessByProcessId(idProc, &targetProcess);
-		KeStackAttachProcess((_KPROCESS*)targetProcess, &state);
+		//KeStackAttachProcess((_KPROCESS*)targetProcess, &state);
 
 		ULONG_PTR baseAddress = (ULONG_PTR)PsGetProcessSectionBaseAddress(targetProcess);
 		PMM_AVL_TABLE pTable = (PMM_AVL_TABLE)((PUCHAR)targetProcess + 0x7d8);
@@ -116,7 +134,7 @@ NTSTATUS Dump(HANDLE idProc)
 		
 		EnumerateNodes(baseAddress, pTable, &pNode);
 
-		KeUnstackDetachProcess(&state);
+		//KeUnstackDetachProcess(&state);
 		ObDereferenceObject(targetProcess);
 	}
 
